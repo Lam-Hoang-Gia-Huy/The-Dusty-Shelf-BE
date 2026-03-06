@@ -136,7 +136,10 @@ public class ChatService implements IChatService {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
-        productDTO.setCategory(product.getCategory());
+        if (product.getCategory() != null) {
+            productDTO.setCategory(product.getCategory().getName());
+            productDTO.setCategoryId(product.getCategory().getId());
+        }
         productDTO.setDescription(product.getDescription());
         productDTO.setPrice(product.getPrice());
         productDTO.setStatus(product.isStatus());

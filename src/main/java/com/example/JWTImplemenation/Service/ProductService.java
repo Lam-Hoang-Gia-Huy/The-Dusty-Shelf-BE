@@ -4,9 +4,12 @@ import com.example.JWTImplemenation.DTO.ProductDTO;
 import com.example.JWTImplemenation.Entities.ImageUrl;
 import com.example.JWTImplemenation.Entities.Product;
 import com.example.JWTImplemenation.Repository.ProductRepository;
+import com.example.JWTImplemenation.Repository.CategoryRepository;
 import com.example.JWTImplemenation.Service.IService.IImageService;
 import com.example.JWTImplemenation.Service.IService.IProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,11 +25,12 @@ public class ProductService implements IProductService {
 
     private final ProductRepository productRepository;
     private final IImageService imageService;
+    private final CategoryRepository categoryRepository;
 
     @Override
-    public ResponseEntity<List<ProductDTO>> findAll() {
-        List<Product> products = productRepository.findAll();
-        return ResponseEntity.ok(convertToDTOList(products));
+    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
+        Page<Product> products = productRepository.findAll(pageable);
+        return ResponseEntity.ok(products.map(this::convertToDTO));
     }
 
     @Override
@@ -37,8 +41,19 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ResponseEntity<ProductDTO> save(Product product) {
-        product.setStatus(true);
+    public ResponseEntity<ProductDTO> save(ProductDTO productDTO) {
+        Product product = Product.builder()
+                .name(productDTO.getName())
+                .description(productDTO.getDescription())
+                .price(productDTO.getPrice())
+                .stockQuantity(productDTO.getStockQuantity())
+                .status(true)
+                .build();
+        
+        if (productDTO.getCategoryId() != null) {
+            categoryRepository.findById(productDTO.getCategoryId()).ifPresent(product::setCategory);
+        }
+
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.ok(convertToDTO(savedProduct));
     }
@@ -68,9 +83,9 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ResponseEntity<List<ProductDTO>> searchProducts(String name, String category, Integer minPrice, Integer maxPrice) {
-        List<Product> products = productRepository.searchWatches(name, category, minPrice, maxPrice);
-        return ResponseEntity.ok(convertToDTOList(products));
+    public ResponseEntity<Page<ProductDTO>> searchProducts(String name, String category, Integer minPrice, Integer maxPrice, Pageable pageable) {
+        Page<Product> products = productRepository.searchWatches(name, category, minPrice, maxPrice, pageable);
+        return ResponseEntity.ok(products.map(this::convertToDTO));
     }
 
     @Override
@@ -103,12 +118,13 @@ public class ProductService implements IProductService {
         if (optionalProduct.isPresent()) {
             Product existingProduct = optionalProduct.get();
             existingProduct.setName(productDTO.getName());
-            existingProduct.setCategory(productDTO.getCategory());
+            if (productDTO.getCategoryId() != null) {
+                categoryRepository.findById(productDTO.getCategoryId()).ifPresent(existingProduct::setCategory);
+            }
             existingProduct.setDescription(productDTO.getDescription());
             existingProduct.setPrice(productDTO.getPrice());
             existingProduct.setStockQuantity(productDTO.getStockQuantity());
             existingProduct.setStatus(productDTO.isStatus());
-
 
             Product updatedProduct = productRepository.save(existingProduct);
             return ResponseEntity.ok(convertToDTO(updatedProduct));
@@ -121,7 +137,10 @@ public class ProductService implements IProductService {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
-        productDTO.setCategory(product.getCategory());
+        if (product.getCategory() != null) {
+            productDTO.setCategory(product.getCategory().getName());
+            productDTO.setCategoryId(product.getCategory().getId());
+        }
         productDTO.setDescription(product.getDescription());
         productDTO.setPrice(product.getPrice());
         productDTO.setStockQuantity(product.getStockQuantity());

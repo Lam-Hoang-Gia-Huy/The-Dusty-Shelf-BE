@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -38,11 +39,13 @@ public class UserController {
 //        return userService.deleteById(id);
 //    }
     @PutMapping("/deactivate/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deactivateUser(@PathVariable Integer id) {
         return userService.deleteById(id);
     }
 
     @PutMapping("/activate/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> activateUser(@PathVariable Integer id) {
         return userService.activateUser(id);
     }

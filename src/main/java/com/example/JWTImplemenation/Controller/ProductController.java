@@ -4,6 +4,9 @@ import com.example.JWTImplemenation.DTO.ProductDTO;
 import com.example.JWTImplemenation.Entities.Product;
 import com.example.JWTImplemenation.Service.IService.IProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +21,8 @@ public class ProductController {
     private final IProductService iProductService;
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        return iProductService.findAll();
+    public ResponseEntity<Page<ProductDTO>> getAllProducts(@PageableDefault(size = 12) Pageable pageable) {
+        return iProductService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
@@ -28,8 +31,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody Product product) {
-        return iProductService.save(product);
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
+        return iProductService.save(productDTO);
     }
 
 
@@ -45,12 +48,13 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductDTO>> searchProducts(
+    public ResponseEntity<Page<ProductDTO>> searchProducts(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) Integer maxPrice) {
-        return iProductService.searchProducts(name, category, minPrice, maxPrice);
+            @RequestParam(required = false) Integer maxPrice,
+            @PageableDefault(size = 12) Pageable pageable) {
+        return iProductService.searchProducts(name, category, minPrice, maxPrice, pageable);
     }
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {

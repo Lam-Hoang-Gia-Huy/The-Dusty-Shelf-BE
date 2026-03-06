@@ -22,7 +22,9 @@ public class Product {
     @GeneratedValue
     private Integer id;
     private String name;
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
     @CreatedDate
     private Timestamp createdDate;
     private String description;

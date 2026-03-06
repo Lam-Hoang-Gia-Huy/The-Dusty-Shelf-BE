@@ -41,6 +41,25 @@ public class AuthenticationService {
                 .build();
     }
 
+    public AuthenticationResponse registerStaff(RegisterRequest request) {
+        var user = User.builder()
+                .name(request.getUserName())
+                .email(request.getEmail())
+                .createdDate(request.getCreatedDate())
+                .avatarUrl(request.getAvatarUrl())
+                .status(true)
+                .password(PasswordEncoder.encode(request.getPassword()))
+                .role(Role.STAFF)
+                .build();
+        userRepository.save(user);
+        var jwtToken = jwtService.generateToken(user);
+        var userDTO = convertToDTO(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .user(userDTO)
+                .build();
+    }
+
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
         if (!user.isStatus()) {

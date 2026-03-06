@@ -13,6 +13,7 @@ public class ProductDTO {
     private Integer id;
     private String name;
     private String category;
+    private Integer categoryId;
     private String description;
     private int stockQuantity;
     private boolean status;
