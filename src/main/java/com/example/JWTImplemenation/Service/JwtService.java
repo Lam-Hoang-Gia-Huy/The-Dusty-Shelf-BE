@@ -24,7 +24,9 @@ import java.security.Key;
 
 public class JwtService {
 
-    private static final String SK = "c9e61eae5dcdd14f966179f28f8e24458a73cde6a54ac57202119ac59e78a691";
+    @Value("${jwt.secret}")
+    private String secretKey;
+
     public String extractUsername(String token){
         return extractClaim(token,Claims::getSubject);
     }
@@ -75,7 +77,7 @@ public class JwtService {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(SK);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

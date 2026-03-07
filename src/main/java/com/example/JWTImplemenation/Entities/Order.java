@@ -31,7 +31,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
-    private Integer totalAmount;
+    private Double totalAmount;
+    private Double originalAmount;
+    private Double discountAmount;
+    private String voucherCode;
 
     @CreatedDate
     private Timestamp createdDate;

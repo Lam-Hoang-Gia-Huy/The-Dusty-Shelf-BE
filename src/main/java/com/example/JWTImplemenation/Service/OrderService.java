@@ -35,6 +35,14 @@ public class OrderService implements IOrderService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
         order.setTotalAmount(orderDTO.getTotalAmount());
+        order.setOriginalAmount(orderDTO.getOriginalAmount());
+        order.setDiscountAmount(orderDTO.getDiscountAmount());
+        order.setVoucherCode(orderDTO.getVoucherCode());
+        
+        System.out.println("Creating order with data: Total=" + orderDTO.getTotalAmount() + 
+                           ", Original=" + orderDTO.getOriginalAmount() + 
+                           ", Discount=" + orderDTO.getDiscountAmount() + 
+                           ", Voucher=" + orderDTO.getVoucherCode());
 
         List<OrderItem> orderItems = orderDTO.getOrderItems().stream().map(itemDTO -> {
             OrderItem orderItem = new OrderItem();
@@ -86,6 +94,9 @@ public class OrderService implements IOrderService {
         orderDTO.setId(order.getId());
         orderDTO.setUserId(order.getUser().getId());
         orderDTO.setTotalAmount(order.getTotalAmount());
+        orderDTO.setOriginalAmount(order.getOriginalAmount());
+        orderDTO.setDiscountAmount(order.getDiscountAmount());
+        orderDTO.setVoucherCode(order.getVoucherCode());
         orderDTO.setUserName(order.getUser().getName());
         orderDTO.setCreatedDate(order.getCreatedDate());
         List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()

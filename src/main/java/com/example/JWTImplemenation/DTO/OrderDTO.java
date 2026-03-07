@@ -15,7 +15,10 @@ public class OrderDTO {
     private Integer userId;
     private String userName;
     private List<OrderItemDTO> orderItems;
-    private Integer totalAmount;
+    private Double totalAmount;
+    private Double originalAmount;
+    private Double discountAmount;
+    private String voucherCode;
     private Timestamp createdDate;
     private Timestamp lastModifiedDate;
 }

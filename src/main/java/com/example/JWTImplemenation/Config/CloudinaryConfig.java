@@ -10,12 +10,21 @@ import java.util.Map;
 
 @Configuration
 public class CloudinaryConfig {
+    @org.springframework.beans.factory.annotation.Value("${cloudinary.cloud_name}")
+    private String cloudName;
+
+    @org.springframework.beans.factory.annotation.Value("${cloudinary.api_key}")
+    private String apiKey;
+
+    @org.springframework.beans.factory.annotation.Value("${cloudinary.api_secret}")
+    private String apiSecret;
+
     @Bean
     public Cloudinary cloudinary() {
         Map<String, Object> config = new HashMap<>();
-        config.put("cloud_name", "dfeuv0ynf");
-        config.put("api_key", "841474939877546");
-        config.put("api_secret", "TpLGUxHYRVRn7l5z5T6o-tn3Ivs");
+        config.put("cloud_name", cloudName);
+        config.put("api_key", apiKey);
+        config.put("api_secret", apiSecret);
         return new Cloudinary(config);
     }
 }
