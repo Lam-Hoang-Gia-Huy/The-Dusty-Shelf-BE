@@ -10,7 +10,6 @@ import com.example.JWTImplemenation.Service.IService.IChatService;
 import com.example.JWTImplemenation.Service.IService.IImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -34,23 +33,25 @@ public class ChatService implements IChatService {
     private ProductRepository watchRepository;
     @Autowired
     private IImageService imageService;
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-@Override
+
+    @Override
     public ResponseEntity<ChatSessionDTO> startChatSession(ChatStartRequest chatStartRequest) {
         Integer watchId = chatStartRequest.getProductId();
         Integer userId = chatStartRequest.getUserId();
         Integer appraiserId = chatStartRequest.getStaffId();
 
         // Check for existing session
-        List<ChatSession> existingSessions = chatSessionRepository.findBySellerIdAndAppraiserIdAndProductId(userId, appraiserId, watchId);
+        List<ChatSession> existingSessions = chatSessionRepository.findBySellerIdAndAppraiserIdAndProductId(userId,
+                appraiserId, watchId);
         if (!existingSessions.isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-        User appraiser = userRepository.findById(appraiserId).orElseThrow(() -> new IllegalArgumentException("Invalid appraiser ID"));
-        Product product = watchRepository.findById(watchId).orElseThrow(() -> new IllegalArgumentException("Invalid watch ID"));
+        User appraiser = userRepository.findById(appraiserId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid appraiser ID"));
+        Product product = watchRepository.findById(watchId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid watch ID"));
         ChatSession chatSession = new ChatSession();
         chatSession.setProduct(product);
         chatSession.setSeller(user);
@@ -61,11 +62,13 @@ public class ChatService implements IChatService {
 
         return ResponseEntity.ok(convertToDTO(chatSession));
     }
-@Override
+
+    @Override
     public ResponseEntity<List<ChatSessionDTO>> getChatSessionsByUserId(Integer userId) {
         List<ChatSession> chatSessions = chatSessionRepository.findBySellerIdOrAppraiserId(userId, userId);
         return ResponseEntity.ok(chatSessions.stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
+
     @Override
     public ResponseEntity<List<ChatMessageDTO>> getChatMessages(Integer sessionId) {
         List<ChatMessage> messages = chatMessageRepository.findByChatSessionId(sessionId);
@@ -89,10 +92,8 @@ public class ChatService implements IChatService {
 
         ChatMessageDTO messageDTO = convertToDTO(chatMessage);
 
-
         return ResponseEntity.ok(messageDTO);
     }
-
 
     private ChatMessageDTO convertToDTO(ChatMessage chatMessage) {
         ChatMessageDTO dto = new ChatMessageDTO();
@@ -120,6 +121,7 @@ public class ChatService implements IChatService {
         dto.setMessages(messages.stream().map(this::convertToDTO).collect(Collectors.toList()));
         return dto;
     }
+
     private UserDTO convertToDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
@@ -132,6 +134,7 @@ public class ChatService implements IChatService {
                 .createdDate(user.getCreatedDate())
                 .build();
     }
+
     private ProductDTO convertToDTO(Product product) {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());

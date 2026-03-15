@@ -9,9 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,19 +19,7 @@ import java.util.List;
 public class ChatController {
 
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
     private IChatService chatService;
-
-    @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public")
-    public ChatMessageDTO sendMessage(ChatMessageDTO chatMessage) {
-        // Only handle broadcasting here, no need to call chatService.sendChatMessage
-        messagingTemplate.convertAndSend("/topic/public", chatMessage);
-
-        return chatMessage;
-    }
 
     @PostMapping("/start")
     @ResponseBody
@@ -55,9 +40,10 @@ public class ChatController {
     @PostMapping("/{sessionId}/messages")
     @ResponseBody
     public ResponseEntity<ChatMessageDTO> sendChatMessage(@PathVariable Integer sessionId,
-                                                          @RequestBody ChatMessageRequest chatMessageRequest) {
+            @RequestBody ChatMessageRequest chatMessageRequest) {
 
-        return chatService.sendChatMessage(sessionId, chatMessageRequest.getMessage(), chatMessageRequest.getSenderId());
+        return chatService.sendChatMessage(sessionId, chatMessageRequest.getMessage(),
+                chatMessageRequest.getSenderId());
     }
 
     @GetMapping("/sessions/{userId}")
