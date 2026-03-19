@@ -16,34 +16,39 @@ public class CartController {
     private ICartService cartService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CartDTO> getCartByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<CartDTO> getCartByUserId(@PathVariable("userId") Integer userId) {
         return cartService.findCartByUserId(userId);
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<CartItemDTO> addToCart(@PathVariable Integer userId, @RequestBody CartItemDTO cartItem) {
+    public ResponseEntity<CartItemDTO> addToCart(@PathVariable("userId") Integer userId,
+            @RequestBody CartItemDTO cartItem) {
         return cartService.addToCart(userId, cartItem);
     }
 
     @DeleteMapping("/{userId}/{cartItemId}")
-    public ResponseEntity<Void> removeFromCart(@PathVariable Integer userId, @PathVariable Integer cartItemId) {
+    public ResponseEntity<Void> removeFromCart(@PathVariable("userId") Integer userId,
+            @PathVariable("cartItemId") Integer cartItemId) {
         return cartService.removeFromCart(userId, cartItemId);
     }
+
     @PostMapping("/clear/{userId}")
-    public ResponseEntity<Void> clearCart(@PathVariable Integer userId) {
+    public ResponseEntity<Void> clearCart(@PathVariable("userId") Integer userId) {
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{userId}/item/{cartItemId}")
     public ResponseEntity<CartDTO> updateCartItemQuantity(
-            @PathVariable Integer userId,
-            @PathVariable Integer cartItemId,
-            @RequestParam Integer quantity) {
+            @PathVariable("userId") Integer userId,
+            @PathVariable("cartItemId") Integer cartItemId,
+            @RequestParam("quantity") Integer quantity) {
         return cartService.updateCartItemQuantity(userId, cartItemId, quantity);
     }
+
     @PutMapping("/{userId}/apply-voucher")
-    public ResponseEntity<CartDTO> applyVoucher(@PathVariable Integer userId, @RequestParam String voucherCode) {
+    public ResponseEntity<CartDTO> applyVoucher(@PathVariable("userId") Integer userId,
+            @RequestParam("voucherCode") String voucherCode) {
         try {
             CartDTO updatedCart = cartService.applyVoucher(userId, voucherCode);
             return ResponseEntity.ok(updatedCart);
@@ -52,4 +57,3 @@ public class CartController {
         }
     }
 }
-

@@ -41,7 +41,8 @@ public class PaymentController {
     private IOrderService orderService;
 
     @PostMapping("/create-payment-url")
-    public Map<String, String> createPaymentUrl(@RequestBody Map<String, Object> payload) throws UnknownHostException, UnsupportedEncodingException {
+    public Map<String, String> createPaymentUrl(@RequestBody Map<String, Object> payload)
+            throws UnknownHostException, UnsupportedEncodingException {
         String vnp_IpAddr = InetAddress.getLocalHost().getHostAddress();
         int amount = (int) payload.get("amount");
         String orderInfo = (String) payload.get("orderInfo");
@@ -96,7 +97,8 @@ public class PaymentController {
         query.setLength(query.length() - 1);
 
         String vnp_SecureHash = new HmacUtils(HmacAlgorithms.HMAC_SHA_512, vnp_HashSecret).hmacHex(hashData.toString());
-        query.append("&vnp_SecureHash=").append(URLEncoder.encode(vnp_SecureHash, StandardCharsets.US_ASCII.toString()));
+        query.append("&vnp_SecureHash=")
+                .append(URLEncoder.encode(vnp_SecureHash, StandardCharsets.US_ASCII.toString()));
         String paymentUrl = VNPayConfig.VNPAY_URL + "?" + query.toString();
 
         Map<String, String> response = new HashMap<>();
@@ -105,7 +107,7 @@ public class PaymentController {
     }
 
     @PostMapping("/verify-payment/{id}")
-    public Map<String, Object> verifyPayment(@PathVariable Integer id, @RequestBody Map<String, String> payload) {
+    public Map<String, Object> verifyPayment(@PathVariable("id") Integer id, @RequestBody Map<String, String> payload) {
         String vnp_HashSecret = VNPayConfig.VNPAY_HASH_SECRET;
         String secureHash = payload.remove("vnp_SecureHash");
 
@@ -216,7 +218,8 @@ public class PaymentController {
 
                     if (createdOrder != null && createdOrder.getBody() != null) {
                         response.put("orderId", createdOrder.getBody().getId());
-                        System.out.println("[PaymentController] Order created with ID: " + createdOrder.getBody().getId());
+                        System.out.println(
+                                "[PaymentController] Order created with ID: " + createdOrder.getBody().getId());
                     }
                     response.put("message", "Payment verified, order created");
 

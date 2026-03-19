@@ -11,15 +11,23 @@ import java.util.List;
 
 public interface IProductService {
     ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable);
-     ResponseEntity<ProductDTO> findById(Integer id);
+
+    ResponseEntity<ProductDTO> findById(Integer id);
+
     ResponseEntity<ProductDTO> save(ProductDTO productDTO);
+
     ResponseEntity<ProductDTO> update(Integer id, Product product);
+
     ResponseEntity<Void> deleteById(Integer id);
-    ResponseEntity<Page<ProductDTO>> searchProducts(String name, String category, Integer minPrice, Integer maxPrice, Pageable pageable);
-    ResponseEntity<ProductDTO> addImagesToWatch(Integer watchId, List<MultipartFile> imageFiles);
+
+    ResponseEntity<Page<ProductDTO>> searchProducts(String name, String author, String category, Integer minPrice,
+            Integer maxPrice,
+            Pageable pageable);
+
+    ResponseEntity<ProductDTO> addImagesToBook(Integer watchId, List<MultipartFile> imageFiles);
 
     ResponseEntity<ProductDTO> update(Integer id, ProductDTO productDTO);
 
-    void updateWatchStatus(List<Integer> watchIds, boolean status, boolean isPaid);
+    void updateBookStatus(List<Integer> watchIds, boolean status, boolean isPaid);
 
 }

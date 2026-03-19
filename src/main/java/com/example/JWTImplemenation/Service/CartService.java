@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +32,10 @@ public class CartService implements ICartService {
     private VoucherRepository voucherRepository;
 
     public CartDTO applyVoucher(Integer userId, String voucherCode) {
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new IllegalArgumentException("Cart not found"));
-        Voucher voucher = voucherRepository.findByCodeAndStatusTrue(voucherCode).orElseThrow(() -> new IllegalArgumentException("Invalid voucher code"));
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        Voucher voucher = voucherRepository.findByCodeAndStatusTrue(voucherCode)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid voucher code"));
 
         double totalPrice = cart.getCartItems().stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
@@ -79,7 +80,8 @@ public class CartService implements ICartService {
                                 (voucher.getEndDate() == null || voucher.getEndDate().getTime() >= now);
 
                         if (!isVoucherValid) {
-                            // Voucher no longer valid: reset cart in DB but keep local variable for response
+                            // Voucher no longer valid: reset cart in DB but keep local variable for
+                            // response
                             cart.setVoucherCode(null);
                             cart.setTotalPrice(totalPrice);
                             cartRepository.save(cart);
@@ -142,7 +144,8 @@ public class CartService implements ICartService {
 
             CartItem cartItem;
             int requestedQuantity = cartItemRequest.getQuantity() != null && cartItemRequest.getQuantity() > 0
-                    ? cartItemRequest.getQuantity() : 1;
+                    ? cartItemRequest.getQuantity()
+                    : 1;
 
             if (existingCartItem.isPresent()) {
                 // Product is already in the cart, add the requested quantity
@@ -173,9 +176,6 @@ public class CartService implements ICartService {
         return ResponseEntity.notFound().build();
     }
 
-
-
-
     @Override
     public ResponseEntity<Void> removeFromCart(Integer userId, Integer cartItemId) {
         Optional<CartItem> cartItemOptional = cartItemRepository.findById(cartItemId);
@@ -194,7 +194,6 @@ public class CartService implements ICartService {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     @Override
     public ResponseEntity<CartDTO> updateCartItemQuantity(Integer userId, Integer cartItemId, Integer quantity) {
@@ -230,11 +229,11 @@ public class CartService implements ICartService {
                 Voucher voucher = voucherOpt.get();
                 // Check if still valid using Timestamp to avoid timezone issues
                 long now = System.currentTimeMillis();
-                if (voucher.isStatus() && 
-                    rawTotal >= voucher.getMinimumPurchase() &&
-                    (voucher.getStartDate() == null || voucher.getStartDate().getTime() <= now) &&
-                    (voucher.getEndDate() == null || voucher.getEndDate().getTime() >= now) &&
-                    voucher.getMaxUsage() > voucher.getCurrentUsage()) {
+                if (voucher.isStatus() &&
+                        rawTotal >= voucher.getMinimumPurchase() &&
+                        (voucher.getStartDate() == null || voucher.getStartDate().getTime() <= now) &&
+                        (voucher.getEndDate() == null || voucher.getEndDate().getTime() >= now) &&
+                        voucher.getMaxUsage() > voucher.getCurrentUsage()) {
                     return rawTotal - voucher.getDiscountValue();
                 } else {
                     cart.setVoucherCode(null); // Invalidated
@@ -264,7 +263,8 @@ public class CartService implements ICartService {
             productDTO.setStatus(product.isStatus());
             productDTO.setPrice(product.getPrice());
             productDTO.setCreatedDate(product.getCreatedDate());
-            productDTO.setImageUrl(product.getImageUrl().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()));
+            productDTO.setImageUrl(
+                    product.getImageUrl().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()));
             cartItemDTO.setProduct(productDTO);
         }
 
@@ -283,7 +283,7 @@ public class CartService implements ICartService {
             List<CartItem> cartItems = cart.getCartItems();
             cartItemRepository.deleteAll(cartItems);
             cart.setCartItems(new ArrayList<>());
-cart.setVoucherCode(null);
+            cart.setVoucherCode(null);
             // Set the total price to zero after clearing the cart
             cart.setTotalPrice(0.0);
             cartRepository.save(cart);
@@ -291,7 +291,7 @@ cart.setVoucherCode(null);
     }
 
     @Override
-    public List<Integer> findWatchIdsInCart(Integer userId) {
+    public List<Integer> findBookIdsInCart(Integer userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
@@ -303,4 +303,5 @@ cart.setVoucherCode(null);
             }
         }
         return new ArrayList<>(); // Return an empty list if cart or user not found
-    }}
+    }
+}

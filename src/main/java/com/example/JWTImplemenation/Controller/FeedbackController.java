@@ -22,14 +22,16 @@ public class FeedbackController {
     }
 
     @PutMapping("/{feedbackId}")
-    public ResponseEntity<FeedbackDTO> updateFeedback(@PathVariable Integer feedbackId, @RequestBody FeedbackDTO feedbackDTO) {
+    public ResponseEntity<FeedbackDTO> updateFeedback(@PathVariable Integer feedbackId,
+            @RequestBody FeedbackDTO feedbackDTO) {
         return feedbackService.updateFeedback(feedbackId, feedbackDTO);
     }
 
     @GetMapping("/{orderItemId}")
-    public ResponseEntity<FeedbackDTO> getFeedback(@PathVariable Integer orderItemId) {
+    public ResponseEntity<FeedbackDTO> getFeedback(@PathVariable("orderItemId") Integer orderItemId) {
         return feedbackService.getFeedbackByProductAndOrder(orderItemId);
     }
+
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<FeedbackDTO>> getAllFeedbackByProduct(
             @PathVariable Integer productId) {

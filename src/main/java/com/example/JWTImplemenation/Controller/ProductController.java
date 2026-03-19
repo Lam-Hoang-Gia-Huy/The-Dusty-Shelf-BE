@@ -1,7 +1,6 @@
 package com.example.JWTImplemenation.Controller;
 
 import com.example.JWTImplemenation.DTO.ProductDTO;
-import com.example.JWTImplemenation.Entities.Product;
 import com.example.JWTImplemenation.Service.IService.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +25,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Integer id) {
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Integer id) {
         return iProductService.findById(id);
     }
 
@@ -35,29 +34,31 @@ public class ProductController {
         return iProductService.save(productDTO);
     }
 
-
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Integer id) {
         return iProductService.deleteById(id);
     }
 
     @PostMapping("/{productId}/images")
-    public ResponseEntity<ProductDTO> addImagesToProduct(@PathVariable Integer productId, @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
-        return iProductService.addImagesToWatch(productId, imageFiles);
+    public ResponseEntity<ProductDTO> addImagesToProduct(@PathVariable("productId") Integer productId,
+            @RequestParam("imageFiles") List<MultipartFile> imageFiles) {
+        return iProductService.addImagesToBook(productId, imageFiles);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductDTO>> searchProducts(
+    public ResponseEntity<Page<ProductDTO>> search(
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String author,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
             @PageableDefault(size = 12) Pageable pageable) {
-        return iProductService.searchProducts(name, category, minPrice, maxPrice, pageable);
+        return iProductService.searchProducts(name, author, category, minPrice, maxPrice, pageable);
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable("id") Integer id,
+            @RequestBody ProductDTO productDTO) {
         return iProductService.update(id, productDTO);
     }
 

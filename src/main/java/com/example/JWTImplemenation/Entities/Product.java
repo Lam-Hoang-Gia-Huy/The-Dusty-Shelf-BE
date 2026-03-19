@@ -1,4 +1,5 @@
 package com.example.JWTImplemenation.Entities;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class Product {
     @GeneratedValue
     private Integer id;
     private String name;
+    private String author;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -33,7 +35,7 @@ public class Product {
     private boolean status;
     @Column(nullable = false, columnDefinition = "float default 0.0")
     private double averageScore;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageUrl> imageUrl;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
@@ -43,4 +45,3 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Feedback> feedbacks;
 }
-

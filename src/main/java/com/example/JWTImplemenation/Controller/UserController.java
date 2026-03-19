@@ -23,24 +23,24 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Integer id) {
+    public ResponseEntity<UserDTO> findById(@PathVariable("id") Integer id) {
         return userService.findById(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Integer id,
-                                              @RequestPart("user") UserDTO userDTO,
-                                              @RequestPart("avatar") MultipartFile avatarFile) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable("id") Integer id,
+            @RequestPart("user") UserDTO userDTO,
+            @RequestPart("avatar") MultipartFile avatarFile) {
         return userService.update(id, userDTO, avatarFile);
     }
 
-    //    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
-//        return userService.deleteById(id);
-//    }
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
+    // return userService.deleteById(id);
+    // }
     @PutMapping("/deactivate/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deactivateUser(@PathVariable Integer id) {
+    public ResponseEntity<Void> deactivateUser(@PathVariable("id") Integer id) {
         return userService.deleteById(id);
     }
 
@@ -49,6 +49,7 @@ public class UserController {
     public ResponseEntity<Void> activateUser(@PathVariable Integer id) {
         return userService.activateUser(id);
     }
+
     @GetMapping("/staff")
     public ResponseEntity<List<UserDTO>> findAllStaff() {
         return userService.findAllStaff();

@@ -9,10 +9,16 @@ import java.util.List;
 
 public interface ICartService {
     ResponseEntity<CartDTO> findCartByUserId(Integer userId);
+
     ResponseEntity<CartItemDTO> addToCart(Integer userId, CartItemDTO cartItemRequest);
+
     ResponseEntity<Void> removeFromCart(Integer userId, Integer cartItemId);
+
     ResponseEntity<CartDTO> updateCartItemQuantity(Integer userId, Integer cartItemId, Integer quantity);
+
     void clearCart(Integer userId);
-    List<Integer> findWatchIdsInCart(Integer userId);
+
+    List<Integer> findBookIdsInCart(Integer userId);
+
     CartDTO applyVoucher(Integer userId, String voucherCode);
 }

@@ -38,11 +38,11 @@ public class OrderService implements IOrderService {
         order.setOriginalAmount(orderDTO.getOriginalAmount());
         order.setDiscountAmount(orderDTO.getDiscountAmount());
         order.setVoucherCode(orderDTO.getVoucherCode());
-        
-        System.out.println("Creating order with data: Total=" + orderDTO.getTotalAmount() + 
-                           ", Original=" + orderDTO.getOriginalAmount() + 
-                           ", Discount=" + orderDTO.getDiscountAmount() + 
-                           ", Voucher=" + orderDTO.getVoucherCode());
+
+        System.out.println("Creating order with data: Total=" + orderDTO.getTotalAmount() +
+                ", Original=" + orderDTO.getOriginalAmount() +
+                ", Discount=" + orderDTO.getDiscountAmount() +
+                ", Voucher=" + orderDTO.getVoucherCode());
 
         List<OrderItem> orderItems = orderDTO.getOrderItems().stream().map(itemDTO -> {
             OrderItem orderItem = new OrderItem();
@@ -60,8 +60,6 @@ public class OrderService implements IOrderService {
         Order savedOrder = orderRepository.save(order);
         return ResponseEntity.ok(convertToDTO(savedOrder));
     }
-
-
 
     @Override
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
@@ -109,15 +107,14 @@ public class OrderService implements IOrderService {
 
     private OrderItemDTO convertOrderItemToDTO(OrderItem orderItem) {
         OrderItemDTO orderItemDTO = new OrderItemDTO();
-        ProductDTO productDTO = convertWatchToDTO(orderItem.getProduct());
+        ProductDTO productDTO = convertBookToDTO(orderItem.getProduct());
         orderItemDTO.setId(orderItem.getId());
         orderItemDTO.setProduct(productDTO);
         orderItemDTO.setQuantity(orderItem.getQuantity()); // Set quantity
         return orderItemDTO;
     }
 
-
-    private ProductDTO convertWatchToDTO(Product product) {
+    private ProductDTO convertBookToDTO(Product product) {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());

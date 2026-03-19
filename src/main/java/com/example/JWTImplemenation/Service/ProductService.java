@@ -7,6 +7,8 @@ import com.example.JWTImplemenation.Repository.ProductRepository;
 import com.example.JWTImplemenation.Repository.CategoryRepository;
 import com.example.JWTImplemenation.Service.IService.IImageService;
 import com.example.JWTImplemenation.Service.IService.IProductService;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +30,14 @@ public class ProductService implements IProductService {
     private final CategoryRepository categoryRepository;
 
     @Override
+    @Transactional
     public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
         return ResponseEntity.ok(products.map(this::convertToDTO));
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ProductDTO> findById(Integer id) {
         Optional<Product> product = productRepository.findById(id);
         return product.map(value -> ResponseEntity.ok(convertToDTO(value)))
@@ -44,12 +48,13 @@ public class ProductService implements IProductService {
     public ResponseEntity<ProductDTO> save(ProductDTO productDTO) {
         Product product = Product.builder()
                 .name(productDTO.getName())
+                .author(productDTO.getAuthor())
                 .description(productDTO.getDescription())
                 .price(productDTO.getPrice())
                 .stockQuantity(productDTO.getStockQuantity())
                 .status(true)
                 .build();
-        
+
         if (productDTO.getCategoryId() != null) {
             categoryRepository.findById(productDTO.getCategoryId()).ifPresent(product::setCategory);
         }
@@ -83,20 +88,28 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ResponseEntity<Page<ProductDTO>> searchProducts(String name, String category, Integer minPrice, Integer maxPrice, Pageable pageable) {
-        Page<Product> products = productRepository.searchWatches(name, category, minPrice, maxPrice, pageable);
+    @Transactional
+    public ResponseEntity<Page<ProductDTO>> searchProducts(String name, String author, String category,
+            Integer minPrice,
+            Integer maxPrice, Pageable pageable) {
+        Page<Product> products = productRepository.searchBooksCustom(name, author, category, minPrice, maxPrice, true,
+                null,
+                null, pageable);
         return ResponseEntity.ok(products.map(this::convertToDTO));
     }
 
     @Override
-    public ResponseEntity<ProductDTO> addImagesToWatch(Integer productId, List<MultipartFile> imageFiles) {
+    @Transactional
+    public ResponseEntity<ProductDTO> addImagesToBook(Integer productId, List<MultipartFile> imageFiles) {
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             List<ImageUrl> imageUrls = new ArrayList<>();
             for (MultipartFile imageFile : imageFiles) {
+                if (imageFile.isEmpty())
+                    continue;
                 String imageUrl = imageService.uploadImage(imageFile);
-                if (imageUrl != null) {
+                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
                     ImageUrl image = new ImageUrl();
                     image.setImageUrl(imageUrl);
                     image.setProduct(product);
@@ -112,12 +125,15 @@ public class ProductService implements IProductService {
         }
         return ResponseEntity.notFound().build();
     }
+
     @Override
+    @Transactional
     public ResponseEntity<ProductDTO> update(Integer id, ProductDTO productDTO) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
             Product existingProduct = optionalProduct.get();
             existingProduct.setName(productDTO.getName());
+            existingProduct.setAuthor(productDTO.getAuthor());
             if (productDTO.getCategoryId() != null) {
                 categoryRepository.findById(productDTO.getCategoryId()).ifPresent(existingProduct::setCategory);
             }
@@ -125,6 +141,15 @@ public class ProductService implements IProductService {
             existingProduct.setPrice(productDTO.getPrice());
             existingProduct.setStockQuantity(productDTO.getStockQuantity());
             existingProduct.setStatus(productDTO.isStatus());
+
+            // Sync Images
+            if (productDTO.getImageUrl() != null && existingProduct.getImageUrl() != null) {
+                // Remove images not in the DTO (orphanRemoval=true handles deletion)
+                existingProduct.getImageUrl()
+                        .removeIf(img -> img != null &&
+                                img.getImageUrl() != null &&
+                                !productDTO.getImageUrl().contains(img.getImageUrl()));
+            }
 
             Product updatedProduct = productRepository.save(existingProduct);
             return ResponseEntity.ok(convertToDTO(updatedProduct));
@@ -137,6 +162,7 @@ public class ProductService implements IProductService {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
+        productDTO.setAuthor(product.getAuthor());
         if (product.getCategory() != null) {
             productDTO.setCategory(product.getCategory().getName());
             productDTO.setCategoryId(product.getCategory().getId());
@@ -162,8 +188,8 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void updateWatchStatus(List<Integer> watchIds, boolean status, boolean isPaid) {
-        for (Integer id : watchIds) {
+    public void updateBookStatus(List<Integer> bookIds, boolean status, boolean isPaid) {
+        for (Integer id : bookIds) {
             Optional<Product> productOptional = productRepository.findById(id);
             if (productOptional.isPresent()) {
                 Product product = productOptional.get();
@@ -172,6 +198,5 @@ public class ProductService implements IProductService {
             }
         }
     }
-
 
 }

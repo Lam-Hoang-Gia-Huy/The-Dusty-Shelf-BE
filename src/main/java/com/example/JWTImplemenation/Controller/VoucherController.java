@@ -20,12 +20,12 @@ public class VoucherController {
     public List<Voucher> getAllVouchers() {
         return voucherService.findAll();
     }
+
     @PutMapping("/deactivate/{id}")
-    public ResponseEntity<String> deactivateVoucher(@PathVariable Integer id) {
+    public ResponseEntity<String> deactivateVoucher(@PathVariable("id") Integer id) {
         voucherService.deactivateVoucher(id);
         return ResponseEntity.ok("Voucher deactivated");
     }
-
 
     @PostMapping
     public Voucher createVoucher(@RequestBody Voucher voucher) {
@@ -34,15 +34,17 @@ public class VoucherController {
     }
 
     @PutMapping("/approve/{id}")
-    public ResponseEntity<String> approveVoucher(@PathVariable Integer id) {
+    public ResponseEntity<String> approveVoucher(@PathVariable("id") Integer id) {
         voucherService.approveVoucher(id);
         return ResponseEntity.ok("Voucher approved");
     }
+
     @GetMapping("/validate")
-    public ResponseEntity<Voucher> validateVoucher(@RequestParam String code) {
+    public ResponseEntity<Voucher> validateVoucher(@RequestParam("code") String code) {
         Optional<Voucher> voucher = voucherService.findByCode(code);
         return voucher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(404).build());
     }
+
     @GetMapping("/available")
     public List<Voucher> getAllAvailableVouchers() {
         return voucherService.findAllAvailableVouchers();

@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO {
     private Integer id;
     private String name;
+    private String author;
     private String category;
     private Integer categoryId;
     private String description;

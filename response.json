@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid JSON payload received. Expected an object key or }.\n\\\n^",
+    "status": "INVALID_ARGUMENT"
+  }
+}

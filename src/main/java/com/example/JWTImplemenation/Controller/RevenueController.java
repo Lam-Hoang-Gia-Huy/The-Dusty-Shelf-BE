@@ -15,7 +15,7 @@ public class RevenueController {
     private IRevenueService revenueService;
 
     @GetMapping("/monthly/{year}")
-    public ResponseEntity<Map<String, Object>> getMonthlyRevenue(@PathVariable int year) {
+    public ResponseEntity<Map<String, Object>> getMonthlyRevenue(@PathVariable("year") int year) {
         return ResponseEntity.ok(revenueService.calculateRevenueByMonth(year));
     }
 
@@ -26,7 +26,7 @@ public class RevenueController {
 
     @GetMapping("/range")
     public ResponseEntity<Map<String, Object>> getRevenueByDateRange(
-            @RequestParam String startDate, @RequestParam String endDate) {
+            @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
         return ResponseEntity.ok(revenueService.calculateRevenueByDateRange(startDate, endDate));
     }
 }

@@ -33,13 +33,13 @@ public class ChatController {
 
     @GetMapping("/{sessionId}/messages")
     @ResponseBody
-    public ResponseEntity<List<ChatMessageDTO>> getChatMessages(@PathVariable Integer sessionId) {
+    public ResponseEntity<List<ChatMessageDTO>> getChatMessages(@PathVariable("sessionId") Integer sessionId) {
         return chatService.getChatMessages(sessionId);
     }
 
     @PostMapping("/{sessionId}/messages")
     @ResponseBody
-    public ResponseEntity<ChatMessageDTO> sendChatMessage(@PathVariable Integer sessionId,
+    public ResponseEntity<ChatMessageDTO> sendChatMessage(@PathVariable("sessionId") Integer sessionId,
             @RequestBody ChatMessageRequest chatMessageRequest) {
 
         return chatService.sendChatMessage(sessionId, chatMessageRequest.getMessage(),
@@ -48,7 +48,7 @@ public class ChatController {
 
     @GetMapping("/sessions/{userId}")
     @ResponseBody
-    public ResponseEntity<List<ChatSessionDTO>> getChatSessionsByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<List<ChatSessionDTO>> getChatSessionsByUserId(@PathVariable("userId") Integer userId) {
         return chatService.getChatSessionsByUserId(userId);
     }
 }
