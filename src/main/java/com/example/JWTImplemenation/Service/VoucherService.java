@@ -19,9 +19,11 @@ public class VoucherService implements IVoucherService {
     public Optional<Voucher> findByCode(String code) {
         return voucherRepository.findByCodeAndStatusTrue(code); // Modified to check status
     }
+
     public List<Voucher> findAll() {
         return voucherRepository.findAll();
     }
+
     public Voucher save(Voucher voucher) {
         return voucherRepository.save(voucher);
     }
@@ -34,18 +36,21 @@ public class VoucherService implements IVoucherService {
             throw new IllegalArgumentException("Voucher usage limit exceeded");
         }
     }
+
     public void deactivateVoucher(Integer id) {
-        Voucher voucher = voucherRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid voucher ID"));
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid voucher ID"));
         voucher.setStatus(false);
         voucherRepository.save(voucher);
     }
 
-
     public void approveVoucher(Integer id) {
-        Voucher voucher = voucherRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid voucher ID"));
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid voucher ID"));
         voucher.setStatus(true);
         voucherRepository.save(voucher);
     }
+
     public List<Voucher> findAllAvailableVouchers() {
         Timestamp currentDate = new Timestamp(System.currentTimeMillis());
         return voucherRepository.findAllAvailableVouchers(currentDate);
