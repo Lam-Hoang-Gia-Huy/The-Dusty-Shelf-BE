@@ -67,6 +67,12 @@ public class AiFunctionTools {
     public record AddToCartResult(boolean success, String message, CartDTO cart) {
     }
 
+    public record UpdateCartItemQuantityRequest(Integer productId, Integer quantity) {
+    }
+
+    public record ClearCartResult(boolean success, String message) {
+    }
+
     public record CategoryInfo(String name, String description, List<BookInfo> topBooks) {
     }
 
@@ -172,6 +178,85 @@ public class AiFunctionTools {
             } catch (Exception e) {
                 log.error("Error adding to cart: ", e);
                 return new AddToCartResult(false, "Lỗi hệ thống khi thêm vào giỏ hàng.", null);
+            }
+        };
+    }
+
+    @Bean
+    @Description("Xem giỏ hàng hiện tại của người dùng")
+    public Function<EmptyRequest, AddToCartResult> viewCart() {
+        return request -> {
+            log.info("AI Function Called - viewCart");
+            Integer userId = com.example.JWTImplemenation.Config.UserContextHolder.getUserId();
+            if (userId == null) {
+                return new AddToCartResult(false, "Vui lòng đăng nhập để xem giỏ hàng.", null);
+            }
+            try {
+                var response = cartService.findCartByUserId(userId);
+                return new AddToCartResult(true, "Đây là giỏ hàng hiện tại của bạn.", response.getBody());
+            } catch (Exception e) {
+                log.error("Error viewing cart: ", e);
+                return new AddToCartResult(false, "Lỗi khi lấy thông tin giỏ hàng.", null);
+            }
+        };
+    }
+
+    @Bean
+    @Description("Cập nhật số lượng của một cuốn sách trong giỏ hàng dựa theo productId. Quantity là số lượng mới (tuyệt đối).")
+    public Function<UpdateCartItemQuantityRequest, AddToCartResult> updateCartItemQuantity() {
+        return request -> {
+            log.info("AI Function Called - updateCartItemQuantity: {}", request);
+            Integer userId = com.example.JWTImplemenation.Config.UserContextHolder.getUserId();
+            if (userId == null) {
+                return new AddToCartResult(false, "Vui lòng đăng nhập để thực hiện thao tác này.", null);
+            }
+            try {
+                var cartResponse = cartService.findCartByUserId(userId);
+                CartDTO cart = cartResponse.getBody();
+                if (cart == null || cart.getCartItems() == null) {
+                    return new AddToCartResult(false, "Giỏ hàng của bạn đang trống.", null);
+                }
+
+                Integer cartItemId = cart.getCartItems().stream()
+                        .filter(item -> item.getProduct().getId().equals(request.productId()))
+                        .map(CartItemDTO::getId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (cartItemId == null) {
+                    return new AddToCartResult(false, "Sản phẩm này không có trong giỏ hàng.", null);
+                }
+
+                if (request.quantity() <= 0) {
+                    cartService.removeFromCart(userId, cartItemId);
+                    var updatedCart = cartService.findCartByUserId(userId);
+                    return new AddToCartResult(true, "Đã xóa sản phẩm khỏi giỏ hàng.", updatedCart.getBody());
+                }
+
+                var response = cartService.updateCartItemQuantity(userId, cartItemId, request.quantity());
+                return new AddToCartResult(true, "Đã cập nhật số lượng thành công.", response.getBody());
+            } catch (Exception e) {
+                log.error("Error updating cart quantity: ", e);
+                return new AddToCartResult(false, "Lỗi khi cập nhật số lượng.", null);
+            }
+        };
+    }
+
+    @Bean
+    @Description("Xóa toàn bộ sản phẩm trong giỏ hàng")
+    public Function<EmptyRequest, ClearCartResult> clearCart() {
+        return request -> {
+            log.info("AI Function Called - clearCart");
+            Integer userId = com.example.JWTImplemenation.Config.UserContextHolder.getUserId();
+            if (userId == null) {
+                return new ClearCartResult(false, "Vui lòng đăng nhập để xóa giỏ hàng.");
+            }
+            try {
+                cartService.clearCart(userId);
+                return new ClearCartResult(true, "Đã xóa toàn bộ giỏ hàng thành công.");
+            } catch (Exception e) {
+                log.error("Error clearing cart: ", e);
+                return new ClearCartResult(false, "Lỗi khi xóa giỏ hàng.");
             }
         };
     }

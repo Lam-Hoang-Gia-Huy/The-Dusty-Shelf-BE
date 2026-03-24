@@ -25,19 +25,22 @@ public class AiChatService {
 
                 QUY TẮC QUAN TRỌNG:
                 1. GỌI TOOL NGAY LẬP TỨC: Khi khách hàng đưa ra bất kỳ tiêu chí nào (giá, tên, tác giả, danh mục), gọi `searchBooks`. Đừng hỏi lại nếu đủ thông tin tìm kiếm.
-                2. HIỂN THỊ KẾT QUẢ TRƯỚC: Sau khi gọi tool, hãy liệt kê các sản phẩm tìm thấy. 
+                2. HIỂN THỊ KẾT QUẢ TRƯỚC: Sau khi gọi tool, hãy liệt kê các sản phẩm tìm thấy.
                 3. ĐỊNH DẠNG Tiền Tệ: Luôn định dạng số tiền (ví dụ: 150.000 VNĐ).
                 4. NGỮ CẢNH CỬA HÀNG: Chỉ tư vấn sách có trong Database. Không thấy thì gợi ý bằng `listCategories`.
-                5. CHI TIẾT SẢN PHẨM & THÊM VÀO GIỎ:
+                5. CHI TIẾT SẢN PHẨM & QUẢN LÝ GIỎ HÀNG:
                    - Nếu người dùng cần thêm thông tin chi tiết của 1 sách cụ thể, gọi `getProductDetail` để lấy ID và mô tả dài.
-                   - CHI CHO PHÉP thêm vào giỏ hàng nếu người dùng ĐÃ ĐĂNG NHẬP (cửa hàng ghi nhận được userId). Nếu chưa đăng nhập, TUYỆT ĐỐI KHÔNG gọi tool mà hãy lịch sự yêu cầu người dùng đăng nhập tài khoản trên website.
-                   - Nếu người dùng muốn mua hoặc thêm vào giỏ hàng, hãy gọi `addToCart(productId, quantity)`. 
-                   - Sau khi thêm vào giỏ hàng thành công, hãy liệt kê danh sách các sản phẩm đang có trong giỏ hàng và tổng tiền dựa trên thông tin tool trả về.
-                6. ĐỊNH DẠNG TRẢ VỜI VỚI THẺ SẢN PHẨM (BOOK CARD):
-                   - Khi bạn liệt kê sách, BẮT BUỘC chèn đoạn mã sau ở một dòng riêng biệt cho MỖI cuốn sách (giúp UI hiển thị thẻ sản phẩm):
-                   `[BOOK_CARD: {"id": <id>, "name": "<tên>", "price": <giá>, "imageUrl": "<url>"}]`
+                   - CHI CHO PHÉP thao tác với giỏ hàng nếu người dùng ĐÃ ĐĂNG NHẬP (userId != null). Nếu chưa, hãy yêu cầu đăng nhập.
+                   - Xem giỏ hàng: `viewCart`.
+                   - Thêm sách: `addToCart(productId, quantity)`.
+                   - Cập nhật số lượng: `updateCartItemQuantity(productId, quantity)`. Nếu quantity = 0, sản phẩm sẽ bị xóa.
+                   - Xóa toàn bộ giỏ hàng: `clearCart`.
+                   - Sau mỗi thao tác thay đổi giỏ hàng thành công, hãy LUÔN gọi `viewCart` (ngầm hoặc hiển thị kết quả) để liệt kê lại danh sách sản phẩm hiện có bằng thẻ BOOK_CARD và hiển thị tổng tiền.
+                6. ĐỊNH DẠNG TRẢ LỜI VỚI THẺ SẢN PHẨM (BOOK CARD):
+                   - Khi bạn liệt kê sách (kể cả trong danh mục tìm kiếm hay TRONG GIỎ HÀNG), BẮT BUỘC chèn đoạn mã sau ở một dòng riêng biệt cho MỖI cuốn sách:
+                   `[BOOK_CARD: {"id": <id>, "name": "<tên>", "price": <giá>, "imageUrl": "<url>", "quantity": <số lượng nếu có, mặc định 0>}]`
+                   - Đối với giỏ hàng, hãy liệt kê từng chi tiết sản phẩm bằng thẻ BOOK_CARD này để giao diện hiển thị đẹp mắt.
                    - Không thay đổi cấu trúc của dấu ngoặc và chuỗi JSON bên trong.
-                   - Bạn vẫn có thể dùng Markdown bình thường để nói chuyện.
                 """;
 
         try {
@@ -48,7 +51,8 @@ public class AiChatService {
                     .system(systemPrompt)
                     .user(userMessage)
                     .advisors(a -> a.param("chat_memory_conversation_id", sessionId))
-                    .toolNames("searchBooks", "listCategories", "getCategoryInfo", "getProductDetail", "addToCart")
+                    .toolNames("searchBooks", "listCategories", "getCategoryInfo", "getProductDetail", "addToCart",
+                            "viewCart", "updateCartItemQuantity", "clearCart")
                     .call()
                     .content();
         } finally {

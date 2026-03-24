@@ -3,6 +3,7 @@ package com.example.JWTImplemenation.Repository;
 import com.example.JWTImplemenation.Entities.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -15,5 +16,5 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
 
     Optional<Voucher> findByCode(String voucherCode);
     @Query("SELECT v FROM Voucher v WHERE v.status = true AND v.currentUsage < v.maxUsage AND v.startDate <= :currentDate AND v.endDate >= :currentDate")
-    List<Voucher> findAllAvailableVouchers(Timestamp currentDate);
+    List<Voucher> findAllAvailableVouchers(@Param("currentDate") Timestamp currentDate);
 }
